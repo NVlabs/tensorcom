@@ -1,0 +1,107 @@
+#!/usr/bin/python3
+import argparse
+import multiprocessing
+import sys
+from functools import partial
+
+import dlinputs as dli
+import numpy as np
+import simplejson
+import torch
+import torch.nn.functional as F
+from tensorcom import zcom
+from torch import nn, optim
+from torchvision import datasets, transforms
+import webloader as wl
+
+parser = argparse.ArgumentParser("""
+Serve the Imagenet dataset for training.
+
+By default, data is served as tuples (img, cls), where
+img is a (batch, h, w, channel) array of type uint8
+and cls is a (batch,) array of type int32.
+
+The batch size can be adjusted using the `-b` argument.
+
+This program reads sharded tar files from any URL.
+
+Usage:
+""")
+parser.add_argument("service_address", nargs="*")
+parser.add_argument("-u", "--url",
+                    default = "http://storage.googleapis.com/lpr-imagenet-augmented/imagenet_train-{0000..0147}-{000..019}.tgz",
+                    help="source shard(s) (use --google to point at Google bucket)")
+parser.add_argument("-b", "--batch-size", type=int, default=32,
+                    help="batch the input")
+parser.add_argument("-r", "--report", type=int, default=10,
+                    help="report on progress this frequently")
+parser.add_argument("-B", "--benchmark", action="store_true",
+                    help="eliminate I/O overhead by just preloading and serving one sample")
+parser.add_argument("-p", "--parallel", type=int, default=0,
+                    help="spawn multiple subprocesses for parallel I/O")
+args = parser.parse_args()
+
+assert args.batch_size > 0, args.batch_size
+assert args.batch_size < 100000, args.batch_size
+
+
+if args.service_address == []:
+    args.service_address = ["zpub://127.0.0.1:7880"]
+
+
+if args.parallel > 0:
+    assert len(args.service_address) == 1
+    assert args.service_address[0].startswith("zpush") or \
+        args.service_address[0].startswith("zrpub")
+    args.service_address = args.service_address * args.parallel
+
+
+def fixtype(a):
+    if isinstance(a, (int, float, str)):
+        return a
+    if isinstance(a, np.ndarray):
+        if a.dtype == np.int64:
+            return a.astype(np.int32)
+        if a.dtype == np.float64:
+            return a.astype(np.float32)
+    return a
+
+batch_transforms = [
+    lambda x: x.astype(np.uint8),
+    lambda x: x.astype(np.int32)
+]
+
+def start_server(con, report=args.report, benchmark=args.benchmark):
+    print("serving {}".format(con))
+    serve = zcom.Connection(con)
+    source = wl.WebLoader(
+        args.url, 1000000,
+        epochs=999999999,
+        decode="rgb8",
+        batch_size=args.batch_size,
+        fields="png;jpg;jpeg;ppm cls",
+        batch_transforms=batch_transforms)
+
+    if not benchmark:
+        for i, (img, cls) in enumerate(source):
+            if i % report == 0:
+                print(i, serve.stats.summary())
+                sys.stdout.flush()
+            serve.send([img, cls])
+    else:
+        for i, (img, cls) in enumerate(source):
+            break
+        for i, (img, cls) in enumerate(source):
+            if i % report == 0:
+                print(i, serve.stats.summary())
+                sys.stdout.flush()
+            serve.send([img, cls])
+
+
+if len(args.service_address) == 1:
+    start_server(args.service_address[0])
+else:
+    nproc = len(args.service_address)
+    pool = multiprocessing.Pool(nproc)
+    print(pool)
+    pool.map(start_server, args.service_address)
