@@ -3,16 +3,11 @@
 import argparse
 import sys
 
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import simplejson
 import tensorcom
-import torch
-import torch.nn.functional as F
 from matplotlib import cm
-from torch import nn, optim
-from torchvision import datasets, transforms
 
 parser = argparse.ArgumentParser("show tensor inputs")
 parser.add_argument("input", nargs="*")
@@ -61,7 +56,7 @@ def smartshow(img, batch_index=None, cmap=cm.viridis):
         elif img.shape[-1] == 1:
             plt.imshow(img[..., 0], cmap=cmap)
     elif img.ndim == 2:
-        imshow(img, cmap=cmap)
+        plt.imshow(img, cmap=cmap)
 
 
 def info(x):

@@ -5,16 +5,10 @@ import logging
 import multiprocessing
 import os
 import sys
-from functools import partial
 
-import dlinputs as dli
 import numpy as np
-import simplejson
 from tensorcom import zcom
 import torch
-import torch.nn.functional as F
-from dlinputs import filters, gopen, improc, utils
-from torch import nn, optim
 from torchvision import datasets, transforms
 
 logger = logging.getLogger()
