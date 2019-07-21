@@ -1,17 +1,11 @@
 #!/usr/bin/python3
+
 import argparse
 import multiprocessing
 import sys
-from functools import partial
 
-import dlinputs as dli
 import numpy as np
-import simplejson
-import torch
-import torch.nn.functional as F
 from tensorcom import zcom
-from torch import nn, optim
-from torchvision import datasets, transforms
 import webloader as wl
 
 parser = argparse.ArgumentParser("""

@@ -1,11 +1,7 @@
 #!/usr/bin/python3
 
 import argparse
-import sys
 import time
-from math import inf
-
-import numpy as np
 import tensorcom
 
 parser = argparse.ArgumentParser("show tensor inputs")
