@@ -12,7 +12,7 @@ from future import standard_library
 from past.utils import old_div
 import logging
 
-from . import codec
+from . import tenbin
 
 standard_library.install_aliases()
 
@@ -314,11 +314,11 @@ class Connection(object):
         :param allow64: allow 64 bit data (Default value = False)
 
         """
-        codec.check_acceptable_input_type(data, allow64)
+        tenbin.check_acceptable_input_type(data, allow64)
         if self.multipart:
-            codec.zsend_multipart(self.socket, data, self.infos)
+            tenbin.zsend_multipart(self.socket, data, self.infos)
         else:
-            codec.zsend_single(self.socket, data, self.infos)
+            tenbin.zsend_single(self.socket, data, self.infos)
         self.stats.add(sum(a.nbytes for a in data))
 
     def recv(self):
@@ -326,10 +326,10 @@ class Connection(object):
         if self.raw:
             self.socket.recv_multipart()
         if self.multipart:
-            data = codec.zrecv_multipart(self.socket, self.infos)
+            data = tenbin.zrecv_multipart(self.socket, self.infos)
         else:
-            data = codec.zrecv_single(self.socket, self.infos)
-        codec.check_acceptable_input_type(data, True)
+            data = tenbin.zrecv_single(self.socket, self.infos)
+        tenbin.check_acceptable_input_type(data, True)
         if isinstance(data, tuple):
             data = list(data)
         data = transform_with(data, self.batch_transforms)
