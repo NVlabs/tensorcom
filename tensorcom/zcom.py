@@ -93,7 +93,7 @@ class Statistics(object):
 
     def summary(self):
         """Return a summary of recent statistics."""
-        return "rate {:1f} samp/s throughput {:.2e} bytes/s".format(
+        return "rate {:1f} msg/s throughput {:.2e} bytes/s".format(
             self.recent_rate(),
             self.recent_throughput())
 
@@ -336,7 +336,7 @@ class Connection(object):
         data = transform_with(data, self.converters)
         return data
 
-    def batchsize(self, x):
+    def batchsize(self, xs):
         if self.batch_count:
             return len(xs[0])
         else:
@@ -358,9 +358,10 @@ class Connection(object):
                 next_report += report
             count += self.batchsize(sample)
 
-    def items(self):
+    def items(self, report=-1):
         """Receive data through an iterator"""
         count = 0
+        next_report = 0
         while True:
             if self.total > 0 and self.count >= self.total:
                 return
@@ -368,7 +369,7 @@ class Connection(object):
             if report > 0 and count >= next_report:
                 print("count", count, self.stats.summary())
                 next_report += report
-            count += self.batchsize(sample)
+            count += self.batchsize(result)
             yield result
 
     def __iter__(self):
