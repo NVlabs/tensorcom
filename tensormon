@@ -8,6 +8,7 @@ parser = argparse.ArgumentParser("show tensor inputs")
 parser.add_argument("input", nargs="*")
 parser.add_argument("-R", "--raw", action="store_true")
 parser.add_argument("-r", "--report", type=int, default=10)
+parser.add_argument("-c", "--count", type=int, default=999999999)
 args = parser.parse_args()
 
 if args.input == []:
@@ -41,3 +42,5 @@ while True:
                 index, total/delta, total/delta*bs, bs))
             total = 0
             last = time.time()
+        if index > args.count: break
+    if index > args.count: break
