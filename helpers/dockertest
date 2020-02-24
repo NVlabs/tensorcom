@@ -44,8 +44,6 @@ docker build -t tensorcomtest .
 rm -f Dockerfile
 ;;
 
-# run the test as a second stage build without caching
-
 git)
 docker build -t tensorcomtest --no-cache - <<EOF
 FROM tensorcomtest-base
@@ -60,7 +58,8 @@ EOF
 ;;
 
 package)
-docker build -t tensorcomtest --no-cache - <<EOF
+cd dist
+cat > Dockerfile <<EOF
 FROM tensorcomtest-base
 ENV SHELL=/bin/bash
 RUN git clone https://git@github.com/NVLabs/tensorcom.git /tmp/tensorcom
@@ -70,9 +69,13 @@ WORKDIR /tmp/work
 RUN ln -s /tmp/venv .
 RUN . venv/bin/activate; pip install --no-cache-dir pytest
 #RUN . venv/bin/activate; pip install --no-cache-dir tensorcom
-RUN . venv/bin/activate; pip install https://tmb-testreleases.storage.googleapis.com/tensorcom-latest-py3-none-any.whl
+#RUN . venv/bin/activate; pip install https://tmb-testreleases.storage.googleapis.com/tensorcom-latest-py3-none-any.whl
+ADD tensorcom-*.whl /tmp
+RUN . venv/bin/activate; pip install --no-cache-dir /tmp/tensorcom-*-py3-none-any.whl
 RUN . venv/bin/activate; python3 -m pytest
 EOF
+docker build -t tensorcomtest .
+rm -f Dockerfile
 ;;
 
 pip)
@@ -87,7 +90,7 @@ RUN ln -s /tmp/venv .
 RUN . venv/bin/activate; pip install --no-cache-dir pytest
 RUN . venv/bin/activate; pip install --no-cache-dir tensorcom
 #RUN . venv/bin/activate; pip install https://tmb-testreleases.storage.googleapis.com/tensorcom-latest-py3-none-any.whl
-RUN . venv/bin/activate; python3 -m pytest
+#RUN . venv/bin/activate; python3 -m pytest
 EOF
 ;;
 

@@ -18,7 +18,7 @@ setuptools.setup(
     author="Thomas Breuel",
     author_email="tmbdev+removeme@gmail.com",
     description="Distributed preprocessing for deep learning.",
-    install_requires="Pillow simplejson braceexpand msgpack pyyaml numpy torch".split(),
+    install_requires="webdataset pyzmq msgpack torch".split(),
     keywords="object store, client, deep learning",
     license="MIT",
     long_description=open("README.md").read(),

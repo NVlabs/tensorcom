@@ -38,15 +38,13 @@ wheel: FORCE
 	rm -f dist/*
 	$(PYTHON3) setup.py sdist bdist_wheel
 
-uploadwheel: wheel FORCE
-	gsutil cp dist/*.whl $(BUCKET)/$$(ls dist/*.whl | xargs basename | sed 's/-[0-9.]*-/-latest-/')
-	gsutil cp dist/*.tar.gz $(BUCKET)/$$(ls dist/*.tar.gz | xargs basename | sed 's/-[0-9.]*.tar.gz/-latest.tar.gz/')
+wheeltest: wheel FORCE
+	#gsutil cp dist/*.whl $(BUCKET)/$$(ls dist/*.whl | xargs basename | sed 's/-[0-9.]*-/-latest-/')
+	#gsutil cp dist/*.tar.gz $(BUCKET)/$$(ls dist/*.tar.gz | xargs basename | sed 's/-[0-9.]*.tar.gz/-latest.tar.gz/')
+	./helpers/dockertest package
 
 githubtests: FORCE
 	./helpers/dockertest git
-
-packagetest: wheel FORCE
-	./helpers/dockertest package
 
 pypitests: FORCE
 	./helpers/dockertest pip
