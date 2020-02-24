@@ -89,8 +89,7 @@ WORKDIR /tmp/work
 RUN ln -s /tmp/venv .
 RUN . venv/bin/activate; pip install --no-cache-dir pytest
 RUN . venv/bin/activate; pip install --no-cache-dir tensorcom
-#RUN . venv/bin/activate; pip install https://tmb-testreleases.storage.googleapis.com/tensorcom-latest-py3-none-any.whl
-#RUN . venv/bin/activate; python3 -m pytest
+RUN . venv/bin/activate; python3 -m pytest
 EOF
 ;;
 
