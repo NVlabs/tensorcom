@@ -9,7 +9,8 @@ from tensorcom import zcom
 from webdataset import WebDataset
 from torch.utils.data import DataLoader
 
-parser = argparse.ArgumentParser("""
+parser = argparse.ArgumentParser(
+    """
 Serve the Imagenet dataset for training.
 
 By default, data is served as tuples (img, cls), where
@@ -21,23 +22,36 @@ The batch size can be adjusted using the `-b` argument.
 This program reads sharded tar files from any URL.
 
 Usage:
-""")
+"""
+)
 parser.add_argument("service_address", nargs="*")
-parser.add_argument("-u", "--url",
-                    default = "http://storage.googleapis.com/lpr-imagenet-augmented/imagenet_train-{0000..0147}-{000..019}.tgz",
-                    help="source shard(s) (use --google to point at Google bucket)")
-parser.add_argument("-b", "--batch-size", type=int, default=32,
-                    help="batch the input")
-parser.add_argument("-r", "--report", type=int, default=10,
-                    help="report on progress this frequently")
-parser.add_argument("-B", "--benchmark", action="store_true",
-                    help="eliminate I/O overhead by just preloading and serving one sample")
-parser.add_argument("-p", "--parallel", type=int, default=0,
-                    help="spawn multiple subprocesses for parallel I/O")
-parser.add_argument("-S", "--shuffle", action="store_true",
-                    help="shuffle the data")
-parser.add_argument("-N", "--num-workers", type=int, default=0,
-                    help="num_workers for DataLoader")
+parser.add_argument(
+    "-u",
+    "--url",
+    default="http://storage.googleapis.com/lpr-imagenet-augmented/imagenet_train-{0000..0147}-{000..019}.tgz",
+    help="source shard(s) (use --google to point at Google bucket)",
+)
+parser.add_argument("-b", "--batch-size", type=int, default=32, help="batch the input")
+parser.add_argument(
+    "-r", "--report", type=int, default=10, help="report on progress this frequently"
+)
+parser.add_argument(
+    "-B",
+    "--benchmark",
+    action="store_true",
+    help="eliminate I/O overhead by just preloading and serving one sample",
+)
+parser.add_argument(
+    "-p",
+    "--parallel",
+    type=int,
+    default=0,
+    help="spawn multiple subprocesses for parallel I/O",
+)
+parser.add_argument("-S", "--shuffle", action="store_true", help="shuffle the data")
+parser.add_argument(
+    "-N", "--num-workers", type=int, default=0, help="num_workers for DataLoader"
+)
 args = parser.parse_args()
 
 assert args.batch_size > 0, args.batch_size
@@ -50,8 +64,9 @@ if args.service_address == []:
 
 if args.parallel > 0:
     assert len(args.service_address) == 1
-    assert args.service_address[0].startswith("zpush") or \
-        args.service_address[0].startswith("zrpub")
+    assert args.service_address[0].startswith("zpush") or args.service_address[
+        0
+    ].startswith("zrpub")
     args.service_address = args.service_address * args.parallel
 
 
@@ -65,10 +80,12 @@ def fixtype(a):
             return a.astype(np.float32)
     return a
 
+
 def infinite(source):
     while True:
         for sample in source:
             yield sample
+
 
 def start_server(con, report=args.report, benchmark=args.benchmark):
     print("serving {}".format(con))
@@ -77,11 +94,14 @@ def start_server(con, report=args.report, benchmark=args.benchmark):
         args.url,
         extensions="png;jpg;jpeg;ppm cls",
         decoder="rgb8",
-        shuffle=int(args.shuffle>0))
-    source = DataLoader(dataset,
-                        batch_size=args.batch_size,
-                        shuffle=args.shuffle,
-                        num_workers=args.num_workers)
+        shuffle=int(args.shuffle > 0),
+    )
+    source = DataLoader(
+        dataset,
+        batch_size=args.batch_size,
+        shuffle=args.shuffle,
+        num_workers=args.num_workers,
+    )
 
     if not benchmark:
         for i, (img, cls) in enumerate(infinite(source)):
@@ -99,6 +119,7 @@ def start_server(con, report=args.report, benchmark=args.benchmark):
                 sys.stdout.flush()
             img, cls = img.numpy(), cls.numpy()
             serve.send([img, cls])
+
 
 if len(args.service_address) == 1:
     start_server(args.service_address[0])

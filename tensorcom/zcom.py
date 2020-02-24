@@ -23,12 +23,13 @@ schemes = dict(
     zrpush=(zmq.PUSH, True),
     zrpull=(zmq.PULL, False),
     zrpub=(zmq.PUB, False),
-    zrsub=(zmq.SUB, True)
+    zrsub=(zmq.SUB, True),
 )
 
 
 class Statistics(object):
     """Compute running statistics over numbers, including rates. """
+
     def __init__(self, horizon=1000):
         """
 
@@ -91,8 +92,8 @@ class Statistics(object):
     def summary(self):
         """Return a summary of recent statistics."""
         return "rate {:1f} msg/s throughput {:.2e} bytes/s".format(
-            self.recent_rate(),
-            self.recent_throughput())
+            self.recent_rate(), self.recent_throughput()
+        )
 
 
 def tonumpy(dtype=None, transpose=True):
@@ -102,6 +103,7 @@ def tonumpy(dtype=None, transpose=True):
     :param transpose: whether to transpose images from PyTorch (Default value = True)
 
     """
+
     def f(a):
         """
 
@@ -109,6 +111,7 @@ def tonumpy(dtype=None, transpose=True):
 
         """
         import torch
+
         if isinstance(a, torch.Tensor):
             if a.ndim == 3 and a.shape[0] in [3, 4]:
                 a = a.permute(1, 2, 0)
@@ -117,7 +120,9 @@ def tonumpy(dtype=None, transpose=True):
             return a.detach().cpu().numpy()
         else:
             return a
+
     return f
+
 
 def totorch(dtype=None, device="cpu", transpose=True):
     """Curried any-to-torch converter.
@@ -127,6 +132,7 @@ def totorch(dtype=None, device="cpu", transpose=True):
     :param transpose: transpose images to PyTorch conventions (Default value = True)
 
     """
+
     def f(a):
         """
 
@@ -135,6 +141,7 @@ def totorch(dtype=None, device="cpu", transpose=True):
         """
         import torch
         import numpy as np
+
         if isinstance(a, np.ndarray):
             dtype_ = dtype
             if dtype_ is None:
@@ -151,7 +158,9 @@ def totorch(dtype=None, device="cpu", transpose=True):
             return torch.as_tensor(a, device=device, dtype=dtype_)
         else:
             return a
+
     return f
+
 
 def transform_with(sample, transformers):
     """Given a list of values and functions, apply functions to values.
@@ -169,10 +178,11 @@ def transform_with(sample, transformers):
     ntransformers = len(transformers)
     assert len(sample) >= ntransformers
     for i in range(len(sample)):
-        f = transformers[i%ntransformers]
+        f = transformers[i % ntransformers]
         if f is not None:
             result[i] = f(sample[i])
     return result
+
 
 def listify(x):
     """Turn argument into a list.
@@ -196,27 +206,30 @@ def listify(x):
 
 
 converter_table = dict(
-    torch=totorch(),
-    torch_cuda=totorch(device="cuda"),
-    numpy=tonumpy()
+    torch=totorch(), torch_cuda=totorch(device="cuda"), numpy=tonumpy()
 )
+
 
 class Connection(object):
     """A class for sending/receiving tensors via ZMQ sockets."""
-    def __init__(self, url=None,
-                 epoch=100000,
-                 total=-1,
-                 multipart=True,
-                 infos=None,
-                 device=None,
-                 allow64=False,
-                 raw=False,
-                 batch_transforms=None,
-                 batch_count=True,
-                 converters=None,
-                 report=-1,
-                 stats_horizon=1000,
-                 noexpand=False):
+
+    def __init__(
+        self,
+        url=None,
+        epoch=100000,
+        total=-1,
+        multipart=True,
+        infos=None,
+        device=None,
+        allow64=False,
+        raw=False,
+        batch_transforms=None,
+        batch_count=True,
+        converters=None,
+        report=-1,
+        stats_horizon=1000,
+        noexpand=False,
+    ):
         """Initialize a connection.
 
         :param url:  ZMQ-URL to connect to (Default value = None)
@@ -273,13 +286,13 @@ class Connection(object):
                 self.connect(u, topic=topic)
             return
         self.addr = urlparse(url)
-        scheme, transport = (self.addr.scheme.split("+", 2)+["tcp"])[:2]
+        scheme, transport = (self.addr.scheme.split("+", 2) + ["tcp"])[:2]
         kind, bind = schemes[scheme]
         logging.info("kind %s bind %s", kind, bind)
         try:
             if self.socket is None:
                 self.socket = self.context.socket(kind)
-            location = transport+"://"+self.addr.netloc
+            location = transport + "://" + self.addr.netloc
             if transport == "ipc":
                 location += self.addr.path
             self.socket.setsockopt(zmq.LINGER, 0)
@@ -293,8 +306,7 @@ class Connection(object):
                 logging.info("subscribing to '%s'", topic)
                 self.socket.setsockopt_string(zmq.SUBSCRIBE, topic)
         except Exception as e:
-            print("error: url {} location {} kind {}".format(
-                url, location, kind))
+            print("error: url {} location {} kind {}".format(url, location, kind))
             raise e
 
     def close(self):

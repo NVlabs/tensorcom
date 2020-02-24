@@ -37,10 +37,15 @@ while True:
         total += 1
         bs = len(batch[0])
         if index % args.report == 0:
-            delta = time.time()-last
-            print("{:20d} {:8.3f} batches/s {:8.3f} samples/s (batchsize: {:d})".format(
-                index, total/delta, total/delta*bs, bs))
+            delta = time.time() - last
+            print(
+                "{:20d} {:8.3f} batches/s {:8.3f} samples/s (batchsize: {:d})".format(
+                    index, total / delta, total / delta * bs, bs
+                )
+            )
             total = 0
             last = time.time()
-        if index > args.count: break
-    if index > args.count: break
+        if index > args.count:
+            break
+    if index > args.count:
+        break

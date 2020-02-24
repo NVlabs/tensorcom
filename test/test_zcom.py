@@ -2,6 +2,7 @@ import numpy as np
 from tensorcom import zcom
 import random
 
+
 def test_zmq():
     port = random.randint(17000, 38999)
     source = zcom.Connection(f"zpush://127.0.0.1:{port}")
@@ -11,5 +12,5 @@ def test_zmq():
     b, c = sink.recv()
     del sink
     del source
-    assert (a==b).all()
-    assert (a==c).all()
+    assert (a == b).all()
+    assert (a == c).all()

@@ -14,7 +14,8 @@ from torchvision import datasets, transforms
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-parser = argparse.ArgumentParser("""
+parser = argparse.ArgumentParser(
+    """
 Serve the Imagenet dataset for training.
 
 By default, data is served as tuples (img, cls), where
@@ -27,20 +28,41 @@ This program uses the PyTorch data loader, but still
 uses NumPy conventions for actually serving the data.
 
 Usage:
-""")
+"""
+)
 parser.add_argument("service_address", nargs="*")
-parser.add_argument("-d", "--dir", default="./imagenet",
-                    help="directory containing the ImagenNet dataset")
-parser.add_argument("-b", "--batch-size", type=int, default=32,
-                    help="batch the input (default is no batching)")
-parser.add_argument("-r", "--report", type=int, default=10,
-                    help="report on progress this frequently")
-parser.add_argument("-B", "--benchmark", action="store_true",
-                    help="eliminate I/O overhead by just preloading and serving one sample")
-parser.add_argument("-w", "--workers", type=int, default=0,
-                    help="number of DataLoader workers")
-parser.add_argument("-P", "--parallel", type=int, default=0,
-                    help="spawn multiple subprocesses for parallel I/O")
+parser.add_argument(
+    "-d",
+    "--dir",
+    default="./imagenet",
+    help="directory containing the ImagenNet dataset",
+)
+parser.add_argument(
+    "-b",
+    "--batch-size",
+    type=int,
+    default=32,
+    help="batch the input (default is no batching)",
+)
+parser.add_argument(
+    "-r", "--report", type=int, default=10, help="report on progress this frequently"
+)
+parser.add_argument(
+    "-B",
+    "--benchmark",
+    action="store_true",
+    help="eliminate I/O overhead by just preloading and serving one sample",
+)
+parser.add_argument(
+    "-w", "--workers", type=int, default=0, help="number of DataLoader workers"
+)
+parser.add_argument(
+    "-P",
+    "--parallel",
+    type=int,
+    default=0,
+    help="spawn multiple subprocesses for parallel I/O",
+)
 parser.add_argument("-S", "--no-shuffle", action="store_false")
 parser.add_argument("-n", "--normalize", action="store_true")
 args = parser.parse_args()
@@ -50,8 +72,9 @@ if args.service_address == []:
 
 if args.parallel > 0:
     assert len(args.service_address) == 1
-    assert args.service_address[0].startswith("zpush") or \
-        args.service_address[0].startswith("zrpub")
+    assert args.service_address[0].startswith("zpush") or args.service_address[
+        0
+    ].startswith("zrpub")
     args.service_address = args.service_address * args.parallel
 
 logger.info("service:", args.service_address)
@@ -76,29 +99,36 @@ def start_server(con, report=args.report):
 
     logger.info("loading dataset")
 
-    traindir = os.path.join(args.dir, 'train')
-    valdir = os.path.join(args.dir, 'val')
+    traindir = os.path.join(args.dir, "train")
+    valdir = os.path.join(args.dir, "val")
 
     if args.normalize:
-        normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                         std=[0.229, 0.224, 0.225])
+        normalize = transforms.Normalize(
+            mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+        )
         train_dataset = datasets.ImageFolder(
             traindir,
-            transforms.Compose([
-                transforms.RandomResizedCrop(224),
-                transforms.RandomHorizontalFlip(),
-                transforms.ToTensor(),
-                normalize,
-            ]))
+            transforms.Compose(
+                [
+                    transforms.RandomResizedCrop(224),
+                    transforms.RandomHorizontalFlip(),
+                    transforms.ToTensor(),
+                    normalize,
+                ]
+            ),
+        )
     else:
         train_dataset = datasets.ImageFolder(
             traindir,
-            transforms.Compose([
-                transforms.RandomResizedCrop(224),
-                transforms.RandomHorizontalFlip(),
-                transforms.ToTensor(),
-                lambda x: (255*x).type(torch.uint8)
-            ]))
+            transforms.Compose(
+                [
+                    transforms.RandomResizedCrop(224),
+                    transforms.RandomHorizontalFlip(),
+                    transforms.ToTensor(),
+                    lambda x: (255 * x).type(torch.uint8),
+                ]
+            ),
+        )
 
     logger.info("creating dataloader")
 
@@ -107,15 +137,16 @@ def start_server(con, report=args.report):
         batch_size=args.batch_size,
         shuffle=not args.no_shuffle,
         num_workers=args.workers,
-        pin_memory=False)
+        pin_memory=False,
+    )
 
     for i, (img, cls) in enumerate(train_loader):
         if i % report == 0:
             print(i, serve.stats.summary())
             sys.stdout.flush()
         img = img.permute(0, 2, 3, 1).numpy()
-        cls = cls.type(torch.int32).numpy()-1
-        if i==0:
+        cls = cls.type(torch.int32).numpy() - 1
+        if i == 0:
             print(img.shape, img.dtype, np.amin(img), np.amax(img))
             print(cls.shape, cls.dtype)
         serve.send([img, cls])

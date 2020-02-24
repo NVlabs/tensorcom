@@ -12,6 +12,10 @@ tests: venv FORCE
 	rm -f tensorcom.yaml tensorcom.yml # config files that interfere with tests
 	. ./venv/bin/activate; python3 -m pytest -v -x
 
+format: venv FORCE
+	black --target-version py37 tensorcom
+	black --target-version py37 $$(egrep -l '#!.*python' [st]* 2>/dev/null)
+
 # build the virtual environment for development and testing
 
 venv: $(VENV)/bin/activate
