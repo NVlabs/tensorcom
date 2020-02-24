@@ -1,3 +1,8 @@
+[![Test](https://github.com/NVLabs/tensorcom/workflows/Test/badge.svg)](https://github.com/NVLabs/tensorcom/actions?query=workflow%3ATest)
+[![TestPip](https://github.com/NVLabs/tensorcom/workflows/TestPip/badge.svg)](https://github.com/NVLabs/tensorcom/actions?query=workflow%3ATestPip)
+[![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/NVLabs/tensorcom/?ref=repository-badge)
+
+
 # Tensorcom
 
 Tensorcom is a way of loading training data into deep learning frameworks
