@@ -5,13 +5,10 @@ from urllib.parse import urlparse
 import braceexpand
 
 import zmq
-from future import standard_library
 from past.utils import old_div
 import logging
 
 from . import tenbin
-
-standard_library.install_aliases()
 
 
 schemes = dict(

@@ -66,9 +66,9 @@ def unstr64(i):
 
 def check_infos(data, infos, required_infos=None):
     """Implement infos verification logic."""
-    if required_infos == False or required_infos is None:
+    if required_infos is False or required_infos is None:
         return data
-    if required_infos == True:
+    if required_infos is True:
         return data, infos
     assert isinstance(required_infos, (tuple, list))
     for required, actual in zip(required_infos, infos):
@@ -94,7 +94,7 @@ def decode_header(h):
     dtype = np.dtype(short_to_long[unstr64(h[0])])
     info = unstr64(h[1])
     rank = int(h[2])
-    shape = tuple(h[3 : 3 + rank])
+    shape = tuple(h[3:3 + rank])
     return shape, dtype, info
 
 
@@ -139,11 +139,11 @@ def encode_chunks(l):
     result = bytearray(size)
     offset = 0
     for b in l:
-        result[offset : offset + 8] = magic_bytes
+        result[offset:offset + 8] = magic_bytes
         offset += 8
-        result[offset : offset + 8] = struct.pack("@q", b.nbytes)
+        result[offset:offset + 8] = struct.pack("@q", b.nbytes)
         offset += 8
-        result[offset : offset + bytelen(b)] = b
+        result[offset:offset + bytelen(b)] = b
         offset += roundup(bytelen(b))
     return result
 
@@ -154,11 +154,11 @@ def decode_chunks(buf):
     offset = 0
     total = bytelen(buf)
     while offset < total:
-        assert magic_bytes == buf[offset : offset + 8]
+        assert magic_bytes == buf[offset:offset + 8]
         offset += 8
-        nbytes = struct.unpack("@q", buf[offset : offset + 8])[0]
+        nbytes = struct.unpack("@q", buf[offset:offset + 8])[0]
         offset += 8
-        b = buf[offset : offset + nbytes]
+        b = buf[offset:offset + nbytes]
         offset += roundup(nbytes)
         result.append(b)
     return result
@@ -258,7 +258,7 @@ def zrecv_multipart(socket, infos=False):
 
 def sctp_send(socket, dest, l, infos=None):
     """Send arrays as an SCTP datagram.
-    
+
     This is just a convenience function and illustration.
     For more complex networking needs, you may want
     to call encode_buffer and sctp_send directly.
