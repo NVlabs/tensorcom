@@ -5,7 +5,6 @@ from urllib.parse import urlparse
 import braceexpand
 
 import zmq
-from past.utils import old_div
 import logging
 
 from . import tenbin
