@@ -1,0 +1,11 @@
+site_name: webdataset
+nav:
+    - Home: index.md
+    - Keras Example: keras.md
+    - Microbenchmarks: microbenchmarks.md
+    - Module Docs: pydoc.md
+    - Pytorch Example: pytorch.md
+    - PyZMQ Performance: pyzmq-performance.md
+    - Simple Server: simple-server.md
+    - Module Docs: pydoc.md
+theme: readthedocs

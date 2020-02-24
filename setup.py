@@ -2,19 +2,39 @@
 # Copyright (c) 2017 NVIDIA CORPORATION. All rights reserved.
 # See the LICENSE file for licensing terms (BSD-style).
 
-from __future__ import print_function
-
-import glob
 import sys
-from distutils.core import setup  # , Extension, Command
+import setuptools
 
-scripts = "tensorshow tensorstat tensormon serve-imagenet-dir serve-imagenet-shards".split()
+if sys.version_info < (3, 6):
+    sys.exit("Python versions less than 3.6 are not supported")
 
-setup(
-    name='tensorcom',
-    version='v0.0',
+VERSION = '0.1.0'
+
+SCRIPTS = "tensorshow tensorstat tensormon serve-imagenet-dir serve-imagenet-shards".split()
+
+setuptools.setup(
     author="Thomas Breuel",
+    author_email="tmbdev+removeme@gmail.com",
     description="Distributed preprocessing for deep learning.",
+    install_requires="Pillow simplejson braceexpand msgpack pyyaml numpy torch".split(),
+    keywords="object store, client, deep learning",
+    license="MIT",
+    long_description=open("README.md").read(),
+    long_description_content_type="text/markdown",
+    name='tensorcom',
+    name='webdataset',
     packages=["tensorcom"],
+    packages=["webdataset"],
+    python_requires=">=3.6",
     scripts=scripts,
+    scripts=scripts,
+    url="http://github.com/tmbdev/webdataset",
+    version='v0.0',
+    version=VERSION,
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        "License :: OSI Approved :: BSD License",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7"
+    ],
 )
