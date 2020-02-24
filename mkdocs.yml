@@ -1,4 +1,4 @@
-site_name: webdataset
+site_name: tensorcom
 nav:
     - Home: index.md
     - Keras Example: keras.md
