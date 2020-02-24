@@ -10,7 +10,7 @@ def bytelen(a):
         return len(a)
     else:
         raise ValueError(a, "cannot determine nbytes")
-        
+
 def bytedata(a):
     """Return a the raw data corresponding to a."""
     if isinstance(a, (bytearray, bytes, memoryview)):

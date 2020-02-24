@@ -1,12 +1,9 @@
-from __future__ import absolute_import, division, print_function
-
 import collections
 import time
 from builtins import object
 from urllib.parse import urlparse
 import braceexpand
 
-import msgpack
 import zmq
 from future import standard_library
 from past.utils import old_div
@@ -112,7 +109,6 @@ def tonumpy(dtype=None, transpose=True):
 
         """
         import torch
-        import numpy as np
         if isinstance(a, torch.Tensor):
             if a.ndim == 3 and a.shape[0] in [3, 4]:
                 a = a.permute(1, 2, 0)

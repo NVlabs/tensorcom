@@ -50,7 +50,7 @@ git)
 docker build -t tensorcomtest --no-cache - <<EOF
 FROM tensorcomtest-base
 ENV SHELL=/bin/bash
-RUN git clone https://git@github.com/tmbdev/tensorcom.git /tmp/tensorcom
+RUN git clone https://git@github.com/NVLabs/tensorcom.git /tmp/tensorcom
 WORKDIR /tmp/tensorcom
 RUN ln -s /tmp/venv .
 RUN . venv/bin/activate; pip install --no-cache-dir pytest
@@ -63,7 +63,7 @@ package)
 docker build -t tensorcomtest --no-cache - <<EOF
 FROM tensorcomtest-base
 ENV SHELL=/bin/bash
-RUN git clone https://git@github.com/tmbdev/tensorcom.git /tmp/tensorcom
+RUN git clone https://git@github.com/NVLabs/tensorcom.git /tmp/tensorcom
 RUN mkdir /tmp/work
 RUN cp -av /tmp/tensorcom/test* /tmp/work/.
 WORKDIR /tmp/work
@@ -79,7 +79,7 @@ pip)
 docker build -t tensorcomtest --no-cache - <<EOF
 FROM tensorcomtest-base
 ENV SHELL=/bin/bash
-RUN git clone https://git@github.com/tmbdev/tensorcom.git /tmp/tensorcom
+RUN git clone https://git@github.com/NVLabs/tensorcom.git /tmp/tensorcom
 RUN mkdir /tmp/work
 RUN cp -av /tmp/tensorcom/test* /tmp/work/.
 WORKDIR /tmp/work
@@ -92,7 +92,7 @@ EOF
 ;;
 
 *)
-echo $1: must specify either pip or git
+echo "$1: must specify either pip or git"
 exit 1
 ;;
 
