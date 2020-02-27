@@ -259,6 +259,9 @@ class Connection(object):
         self.converters = listify(converters)
         self.count = 0
         self.report = -1
+        self.sampler = None  # compatibility with DataLoader
+        self.batch_sampler = None  # compatibility with DataLoader
+        self.batch_size = 1
         if url is not None:
             if isinstance(url, str):
                 url = [url]
@@ -338,6 +341,7 @@ class Connection(object):
             data = list(data)
         data = transform_with(data, self.batch_transforms)
         data = transform_with(data, self.converters)
+        self.batch_size = len(data[0])
         return data
 
     def batchsize(self, xs):
