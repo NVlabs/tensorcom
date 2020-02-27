@@ -255,7 +255,8 @@ class Connection(object):
         self.total = total
         self.batch_transforms = listify(batch_transforms)
         self.batch_count = batch_count
-        converters = converter_table.get(converters, converters)
+        if isinstance(converters, str):
+            converters = converter_table.get(converters, [])
         self.converters = listify(converters)
         self.count = 0
         self.report = -1
