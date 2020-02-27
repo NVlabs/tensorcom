@@ -2,3 +2,4 @@ webdataset
 pyzmq
 msgpack
 torch
+braceexpand

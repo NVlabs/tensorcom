@@ -311,7 +311,7 @@ class Connection(object):
         self.socket = None
         self.context = None
 
-    def send(self, data, allow64=False):
+    def send(self, data, *, allow64=False):
         """Send data over the connection.
 
         :param data: list of tensors  (Default value = False)
@@ -346,7 +346,7 @@ class Connection(object):
         else:
             return 1
 
-    def serve(self, source, report=-1):
+    def serve(self, source, *, report=-1):
         """Serve data from an iterator.
 
         :param source: iterator yielding lists/tuples of tensors
