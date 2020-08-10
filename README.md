@@ -5,6 +5,8 @@
 
 # Tensorcom
 
+Status: alpha software release, APIs may still change
+
 Tensorcom is a way of loading training data into deep learning frameworks
 quickly and portably. You can write a single data loading/augmentation
 pipeline and train one or more jobs in the same or different frameworks
