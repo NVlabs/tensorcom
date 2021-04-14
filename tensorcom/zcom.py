@@ -58,13 +58,13 @@ class Statistics(object):
         """Compute the rate."""
         if self.count == 0:
             return 0
-        return old_div(self.count, (self.last - self.start))
+        return self.count / (self.last - self.start)
 
     def throughput(self):
         """Compute the throughput."""
         if self.count == 0:
             return 0
-        return old_div(self.total, (self.last - self.start))
+        return self.total / (self.last - self.start)
 
     def recent_rate(self):
         """Compute the recent rate."""
@@ -73,7 +73,7 @@ class Statistics(object):
         delta = self.recent[-1][0] - self.recent[0][0]
         if delta == 0:
             return 0
-        return old_div(len(self.recent), delta)
+        return len(self.recent) / delta
 
     def recent_throughput(self):
         """Compute the recent throughput."""
@@ -83,7 +83,7 @@ class Statistics(object):
         delta = self.recent[-1][0] - self.recent[0][0]
         if delta == 0:
             return 0
-        return old_div(total, delta)
+        return total / delta
 
     def summary(self):
         """Return a summary of recent statistics."""
@@ -103,7 +103,7 @@ def tonumpy(dtype=None, transpose=True):
     def f(a):
         """
 
-        :param a: 
+        :param a:
 
         """
         import torch
@@ -132,7 +132,7 @@ def totorch(dtype=None, device="cpu", transpose=True):
     def f(a):
         """
 
-        :param a: 
+        :param a:
 
         """
         import torch
@@ -206,6 +206,15 @@ converter_table = dict(
 )
 
 
+def estimate_bytes(a):
+    if isinstance(a, (bytearray, str)):
+        return len(a)
+    elif isinstance(a, numpy.ndarray):
+        return a.nbytes
+    else:
+        return 8
+
+
 class Connection(object):
     """A class for sending/receiving tensors via ZMQ sockets."""
 
@@ -272,7 +281,7 @@ class Connection(object):
                     urls += list(braceexpand.braceexpand(u))
             else:
                 urls = url
-            self.connect(urls)
+            self.urls = urls
 
     def connect(self, url, topic=""):
         """Explicitly connect to a ZMQ socket.
@@ -322,6 +331,8 @@ class Connection(object):
         :param allow64: allow 64 bit data (Default value = False)
 
         """
+        if self.socket is None:
+            self.connect(self.urls)
         tenbin.check_acceptable_input_type(data, allow64)
         if self.multipart:
             tenbin.zsend_multipart(self.socket, data, self.infos)
@@ -331,6 +342,8 @@ class Connection(object):
 
     def recv(self):
         """Receive data from the connection."""
+        if self.socket is None:
+            self.connect(self.urls)
         if self.raw:
             self.socket.recv_multipart()
         if self.multipart:
@@ -340,6 +353,7 @@ class Connection(object):
         tenbin.check_acceptable_input_type(data, True)
         if isinstance(data, tuple):
             data = list(data)
+        self.stats.add(sum(estimate_bytes(a) for a in data))
         data = transform_with(data, self.batch_transforms)
         data = transform_with(data, self.converters)
         self.batch_size = len(data[0])
