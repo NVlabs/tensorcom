@@ -3,6 +3,8 @@ import time
 from builtins import object
 from urllib.parse import urlparse
 import braceexpand
+import numpy as np
+import torch
 
 import zmq
 import logging
@@ -135,8 +137,6 @@ def totorch(dtype=None, device="cpu", transpose=True):
         :param a:
 
         """
-        import torch
-        import numpy as np
 
         if isinstance(a, np.ndarray):
             dtype_ = dtype
@@ -209,7 +209,7 @@ converter_table = dict(
 def estimate_bytes(a):
     if isinstance(a, (bytearray, str)):
         return len(a)
-    elif isinstance(a, numpy.ndarray):
+    elif isinstance(a, np.ndarray):
         return a.nbytes
     else:
         return 8
