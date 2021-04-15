@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 import braceexpand
 import numpy as np
 import torch
-from torch.data.utils import IterableDataset
+from torch.utils.data import IterableDataset
 
 import zmq
 import logging
