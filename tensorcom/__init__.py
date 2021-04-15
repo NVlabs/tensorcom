@@ -1,1 +1,1 @@
-from .zcom import Connection
+from .zcom import Connection, TensorcomDataset
