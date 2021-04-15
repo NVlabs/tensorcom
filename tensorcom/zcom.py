@@ -13,6 +13,9 @@ import logging
 from . import tenbin
 
 
+default_context = zmq.Context()
+
+
 schemes = dict(
     # (KIND, BIND)
     zpush=(zmq.PUSH, False),
@@ -214,6 +217,35 @@ def estimate_bytes(a):
         return 8
 
 
+def zconnect(url, context=default_context):
+    """Explicitly connect to a ZMQ socket.
+
+    :param url: ZMQ-URL to connect to  (Default value = "")
+    :param topic: topic to subscribe to for SUB sockets (Default value = "")
+
+    """
+    addr = urlparse(url)
+    scheme, transport = (addr.scheme.split("+", 2) + ["tcp"])[:2]
+    kind, bind = schemes[scheme]
+    logging.info("kind %s bind %s", kind, bind)
+    socket = context.socket(kind)
+    location = transport + "://" + addr.netloc
+    if transport == "ipc":
+        location += addr.path
+    socket.setsockopt(zmq.LINGER, 0)
+    if bind:
+        logging.info("binding to %s", location)
+        socket.bind(location)
+    else:
+        logging.info("connecting to %s", location)
+        socket.connect(location)
+    if kind == zmq.SUB:
+        topic = "" if addr.fragment is None else addr.fragment
+        logging.info("subscribing to '%s'", topic)
+        socket.setsockopt_string(zmq.SUBSCRIBE, topic)
+    return socket
+
+
 class Connection(object):
     """A class for sending/receiving tensors via ZMQ sockets."""
 
@@ -256,7 +288,7 @@ class Connection(object):
         self.infos = infos
         self.device = device
         self.allow64 = allow64
-        self.context = zmq.Context()
+        self.context = default_context
         self.socket = None
         self.raw = False
         self.epoch = epoch
@@ -282,39 +314,16 @@ class Connection(object):
                 urls = url
             self.connect(urls)
 
-    def connect(self, url, topic=""):
-        """Explicitly connect to a ZMQ socket.
+    def connect(self, url):
 
-        :param url: ZMQ-URL to connect to  (Default value = "")
-        :param topic: topic to subscribe to for SUB sockets (Default value = "")
-
-        """
         if isinstance(url, (list, tuple)):
             for u in url:
-                self.connect(u, topic=topic)
+                self.connect(u)
             return
-        self.addr = urlparse(url)
-        scheme, transport = (self.addr.scheme.split("+", 2) + ["tcp"])[:2]
-        kind, bind = schemes[scheme]
-        logging.info("kind %s bind %s", kind, bind)
         try:
-            if self.socket is None:
-                self.socket = self.context.socket(kind)
-            location = transport + "://" + self.addr.netloc
-            if transport == "ipc":
-                location += self.addr.path
-            self.socket.setsockopt(zmq.LINGER, 0)
-            if bind:
-                logging.info("binding to %s", location)
-                self.socket.bind(location)
-            else:
-                logging.info("connecting to %s", location)
-                self.socket.connect(location)
-            if kind == zmq.SUB:
-                logging.info("subscribing to '%s'", topic)
-                self.socket.setsockopt_string(zmq.SUBSCRIBE, topic)
+            self.socket = zconnect(url)
         except Exception as e:
-            print("error: url {} location {} kind {}".format(url, location, kind))
+            print(f"error: url {url}")
             raise e
 
     def close(self):
