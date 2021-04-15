@@ -280,7 +280,7 @@ class Connection(object):
                     urls += list(braceexpand.braceexpand(u))
             else:
                 urls = url
-            self.connect(self.urls)
+            self.connect(urls)
 
     def connect(self, url, topic=""):
         """Explicitly connect to a ZMQ socket.
