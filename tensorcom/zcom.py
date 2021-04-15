@@ -408,10 +408,10 @@ class Connection(object):
         return self.epoch
 
 
-class NetDataset(IterableDataset):
+class TensorcomDataset(IterableDataset):
 
     def __init__(self, urls, length=1000000):
-        self.urls = urls self.con = None
+        self.urls = urls
         self.length = length
         self.con = None
 
