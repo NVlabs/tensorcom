@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 import braceexpand
 import numpy as np
 import torch
+from torch.data.utils import IterableDataset
 
 import zmq
 import logging
@@ -201,9 +202,7 @@ def listify(x):
         return [x]
 
 
-converter_table = dict(
-    torch=totorch(), torch_cuda=totorch(device="cuda"), numpy=tonumpy()
-)
+converter_table = dict(torch=totorch(), torch_cuda=totorch(device="cuda"), numpy=tonumpy())
 
 
 def estimate_bytes(a):
@@ -281,7 +280,7 @@ class Connection(object):
                     urls += list(braceexpand.braceexpand(u))
             else:
                 urls = url
-            self.urls = urls
+            self.connect(self.urls)
 
     def connect(self, url, topic=""):
         """Explicitly connect to a ZMQ socket.
@@ -331,8 +330,6 @@ class Connection(object):
         :param allow64: allow 64 bit data (Default value = False)
 
         """
-        if self.socket is None:
-            self.connect(self.urls)
         tenbin.check_acceptable_input_type(data, allow64)
         if self.multipart:
             tenbin.zsend_multipart(self.socket, data, self.infos)
@@ -342,8 +339,6 @@ class Connection(object):
 
     def recv(self):
         """Receive data from the connection."""
-        if self.socket is None:
-            self.connect(self.urls)
         if self.raw:
             self.socket.recv_multipart()
         if self.multipart:
@@ -411,3 +406,23 @@ class Connection(object):
         The `len`/`epoch` value is otherwise unused.
         """
         return self.epoch
+
+
+class NetDataset(IterableDataset):
+
+    def __init__(self, urls, length=1000000):
+        self.urls = urls self.con = None
+        self.length = length
+        self.con = None
+
+    def __iter__(self):
+
+        if self.con is None:
+            self.con = Connection(self.urls)
+
+        for i in range(self.length):
+            sample = self.con.recv()
+            yield sample
+
+    def __len__(self):
+        return self.length
